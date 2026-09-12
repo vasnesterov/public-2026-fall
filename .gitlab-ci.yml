@@ -1,0 +1,28 @@
+variables:
+  GIT_DEPTH: 10
+  GIT_STRATEGY: clone
+  REGISTRY: gitlab.manytask.org:5050/lean/public-2026-fall
+  REF_DIR: /opt/shad
+
+# Testing and Grading all changed tasks
+grade:
+  image: $REGISTRY/testenv:latest
+  rules:
+    - if: $CI_PROJECT_NAME =~ /^public-(fall|spring)-20\d\d/
+      when: never
+    - if: $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME =~ /contributing/ || $CI_COMMIT_BRANCH =~ /contributing/
+      when: never
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+      when: on_success
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: on_success
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: manual
+    - when: on_success
+  script:
+    - python -m checker grade
+      --username $GITLAB_USER_LOGIN
+      --submit-score
+      -- $CI_PROJECT_DIR $REF_DIR
+
+
