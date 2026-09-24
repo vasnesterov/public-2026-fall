@@ -5,7 +5,7 @@ import Mathlib.Tactic.Basic
 * `intro`
 * `exact`
 * `apply`
-* `cases'`
+* `cases`
 * `obtain`
 * `constructor`
 * `have`
@@ -30,5 +30,5 @@ theorem weak_peirce (h1 : (Q → P) → P) (h2 : Q → R) (h3 : R → P) : P := 
   sorry
 
 /-- 33 балла -/
-theorem imp_iff_not_or : (P → Q) ↔ (¬ P ∨ Q) := by
+theorem imp_iff_not_or' : (P → Q) ↔ (¬ P ∨ Q) := by
   sorry

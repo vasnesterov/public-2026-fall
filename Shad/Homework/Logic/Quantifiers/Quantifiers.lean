@@ -5,7 +5,7 @@ import Mathlib.Tactic
 * `intro`
 * `exact`
 * `apply`
-* `cases'`
+* `cases`
 * `obtain`
 * `constructor`
 * `left`
