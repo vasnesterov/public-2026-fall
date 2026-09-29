@@ -8,18 +8,39 @@ def X : Type 1 := sorry
 def x : X := sorry
 
 
+
+theorem ttf : 2 + 2 = 4 := by
+  rfl
+
+#check ttf
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /- ## Структуры -/
 
 structure Point : Type where
   x : ℤ
   y : ℤ
 
+-- equiv. ℤ × ℤ
+
 #check Point
 #check Point.x
 
 def pt₁ : Point :=
   {
-    x := 1
+    x := 1,
     y := 2
   }
 
@@ -58,9 +79,9 @@ def Point.add''' : Point → Point → Point :=
 -- в первый из них, имеющий тип `Point`)
 #eval pt₁.x
 
-#eval pt₁.add pt₂
+#eval pt₁.add pt₂ -- Point.add pt₁ pt₂
 #eval pt₁.rotate
-#eval (pt₁.rotate).add pt₂
+#eval pt₁.rotate.add pt₂
 
 
 
@@ -87,7 +108,7 @@ def castUp {n m : ℕ} (x : Fin n) (h : n ≤ m) : Fin m := {
 }
 
 -- `n` и `m` можно не подставлять, они выводятся из типов `x` и `h`
-#check castUp two (show 5 ≤ 10 by norm_num)
+#check castUp two (show 5 ≤ 11 by norm_num)
 
 
 end Hidden
@@ -109,10 +130,18 @@ inductive Bool : Type
 
 -- 2. Как разобрать объект типа Bool?
 
-def Bool.toℕ (b : Bool) : ℕ :=
+def Bool.toNat (b : Bool) : ℕ :=
   match b with
-  | Bool.tr => 1
-  | Bool.fal => 0
+  | .tr => 1
+  | .fal => 0
+
+theorem tr_neq_fal : Bool.tr ≠ Bool.fal := by
+  change _ → False
+  intro h
+  apply_fun Bool.toNat at h
+  simp only [Bool.toNat] at h
+  lia
+
 
 inductive Weekday : Type
   | monday : Weekday
@@ -133,9 +162,17 @@ inductive Weekday'
   | sunday
 
 inductive Unit
-| u
+  | u
 
 inductive Empty
+
+example (x : Unit) : True := by
+  cases x
+  trivial
+
+example (x : Empty) : False := by
+  cases x
+
 
 
 
@@ -159,8 +196,55 @@ inductive Pixel'
 def Pixel.toMonochrome (c : Pixel) : Pixel :=
   match c with
   | monochrome v => monochrome v
-  | rgb r ggg bb => monochrome ((r + ggg + bb) / 3)
+  | rgb r g b => monochrome ((r + g + b) / 3)
 
+
+structure Group (α : Type) where
+  one : α
+  mul : α → α → α
+  inv : α → α
+  mul_one : ∀ x, mul x one = x
+  assoc : ∀ x y z, mul x (mul y z) = mul (mul x y) z
+  mul_inv : ∀ x, mul x (inv x) = one
+
+def groupZ : Group ℤ := {
+  one := 0,
+  mul := fun x y => x + y
+  inv := fun x => -x
+  assoc := by grind
+  mul_inv := by grind
+  mul_one := by grind
+}
+
+-- ℝ∞ = [-∞, +∞]
+
+#check ℝ
+
+inductive ExtendedReal
+  | negInf : ExtendedReal
+  | posInf : ExtendedReal
+  | real : ℝ → ExtendedReal
+
+#check ExtendedReal.negInf
+#check ExtendedReal.real √2
+
+def ExtendedReal.neg (x : ExtendedReal) : ExtendedReal :=
+  match x with
+  | .negInf => .posInf
+  | .posInf => .negInf
+  | .real val => .real (-val)
+
+open ExtendedReal
+
+theorem neg_neg (x : ExtendedReal) : x.neg.neg = x := by
+  cases x with
+  | negInf => rfl -- negInf.neg.neg -> posInf.neg -> negInf
+  | posInf => rfl
+  | real val =>
+    -- (real v).neg.neg -> (real (-v)).neg -> real (-(-v))
+    -- =?= real v
+    -- -(-v) =?= v на ℝ
+    simp [neg]
 
 end Hidden
 
@@ -175,6 +259,8 @@ namespace Hidden2
 inductive Nat : Type
   | zero : Nat
   | succ (n : Nat) : Nat -- n ↦ n + 1
+
+-- succ (succ (succ ...))
 
 #check Nat
 #check Nat.zero
@@ -193,21 +279,55 @@ def Nat.pred (n : Nat) : Nat :=
 def Nat.isEven (n : Nat) : Bool :=
   match n with
   | zero => true
-  | succ m => !(Nat.isEven m)
+  | succ m => not (Nat.isEven m)
+
+
+example (n : ℕ) : n ≤ n ^ 2 := by
+  induction n with
+  | zero =>
+    norm_num
+  | succ m ih =>
+    grind
+
+-- def f (x : ℕ) : ℕ := 1 + f x
+
+-- example (f : ℕ → ℕ) (hf : ∀ x, f x = 1 + f x) : False := by
+--   specialize hf 0
+--   lia
+
+
+
+
+
 
 inductive List (α : Type) : Type
   | nil
   | cons (head : α) (tail : List α)
 
-#eval List.cons 1 List.nil
-#eval List.cons 1 (List.cons 2 .nil)
+#eval List.cons 1 List.nil -- [1]
+#eval List.cons 1 (List.cons 2 .nil) -- [1, 2]
 
 def List.sum (li : List ℤ) : ℤ :=
   match li with
   | nil => 0
   | cons head tail => head + tail.sum
 
+def List.allPositive (li : List ℤ) : Bool :=
+  match li with
+  | nil => true
+  | cons head tail => (head > 0) && tail.allPositive
 
+open List
+example (li : List ℤ) (h : li.allPositive) : li.sum ≥ 0 := by
+  induction li with
+  | nil =>
+    simp [sum]
+  | cons head tail ih =>
+    simp [sum]
+    simp [allPositive] at h
+    obtain ⟨h1, h2⟩ := h
+    specialize ih h2
+    lia
 
 
 /- ## Индуктивные семейства и прочее -/

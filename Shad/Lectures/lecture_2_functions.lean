@@ -2,6 +2,28 @@ import Mathlib
 
 /-! # Функции и стрелочные типы -/
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #check "Hello, world!" -- String
 #eval "Hello, world!"
 
@@ -45,7 +67,7 @@ def square (n : ℕ) : ℕ :=
 -- square(7)
 #eval square 7
 
-#eval (square 7) + 3
+#eval square 7 + 3
 #eval square (7 + 3)
 
 #eval square "hello"
@@ -112,7 +134,7 @@ def greet (name : String) :=
 
 
 def addSquares (n : ℕ) (m : ℕ) : ℕ :=
-  n * n + m * m
+  n ^ 2 + m ^ 2
 
 
 #check addSquares
@@ -215,7 +237,8 @@ def addSquares' : ℕ → ℕ → ℕ :=
 
 
 
-
+-- ℕ → ℕ → ℕ
+-- (n : ℕ) → (m : ℕ) → ℕ
 
 
 -- если head : α, tail : List α
@@ -223,6 +246,9 @@ def addSquares' : ℕ → ℕ → ℕ :=
 -- List.cons head tail = лист, присоединяющий head слева к tail
 -- какой тип будет иметь List.cons?
 
+-- #check List.cons : (α : Type) → α → List α → List α
+
+#check List.cons
 
 
 

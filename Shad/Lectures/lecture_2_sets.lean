@@ -50,7 +50,10 @@ example : A ⊆ A := by
   exact ha
 
 example : A ⊆ B → B ⊆ C → A ⊆ C := by
-  sorry
+  intro hAB hBC a ha
+  apply hAB at ha
+  apply hBC at ha
+  exact ha
 
 example : A ⊆ A ∪ B := by
   intro x hx
@@ -72,7 +75,7 @@ example : x ∈ (∅ : Set α) → False := by
   exact h
 
 -- Aᶜ означает "дополнение к A"
-example : x ∈ Aᶜ → x ∉ A := by
+theorem foo : x ∈ Aᶜ → x ∉ A := by
   intro hx
   change ¬ (x ∈ A) at hx
   exact hx
@@ -81,6 +84,14 @@ example : x ∈ Aᶜ → x ∉ A := by
 example : 74 ∈ {n : ℕ | n % 2 = 0} := by
   change 74 % 2 = 0
   simp
+
+axiom bad : 2 + 2 = 5
+
+theorem bar : False := by
+  sorry
+
+#check Nat.add_div
+#print axioms Nat.add_div
 
 -- чтобы доказать равенство множеств, нужно использовать тактику `ext`
 example : A ∪ A = A := by
@@ -98,8 +109,23 @@ def f : ℤ → ℤ := fun n ↦ 3 * n
 -- `f '' X` означает образ множества под действием `f`
 example : f '' {n | n % 2 = 0} = {n | n % 6 = 0} := by
   ext n
-  sorry
-
+  constructor
+  · intro h
+    simp
+    obtain ⟨x, hx1, hx2⟩ := h
+    subst hx2
+    simp at hx1
+    simp [f]
+    grind
+  · intro h
+    simp at h
+    obtain ⟨m, hm⟩ := h
+    subst hm
+    use 2 * m
+    constructor
+    · simp
+    · simp [f]
+      grind
 
 -- `f ⁻¹' X` означает прообраз множества под действием `f`
 example : id ⁻¹' X = X := by
