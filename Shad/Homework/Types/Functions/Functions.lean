@@ -23,18 +23,12 @@ theorem injective_comp (f : α → β) (g : β → γ)
 
 /- Постройте контрпример к следующему утверждению: если `f` и `g ∘ f` инъективны, то и `g` инъективна.
 
-Типы `A`, `B`, `C` тоже выберите сами.
 Баллы засчитываются только если доказаны все три теоремы ниже.
 
 **(25 баллов)** -/
 
-def A : Type := sorry
-def B : Type := sorry
-def C : Type := sorry
-
-def f : A → B := sorry
-def g : B → C := sorry
-
+def f : sorry → sorry := sorry
+def g : sorry → sorry := sorry
 
 theorem f_injective : Function.Injective f := by
   sorry
